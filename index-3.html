@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ELITE STORE | Premium Collection 2026</title>
+    
+    <!-- External Frameworks (Bootstrap, Icons, Fonts) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <style>
+        :root { 
+            --p-gold: #D4AF37; 
+            --p-dark: #0a0a0a; 
+            --p-gray: #151515; 
+            --p-border: rgba(212, 175, 55, 0.2);
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--p-dark); 
+            color: white; 
+            margin: 0; 
+            overflow-x: hidden; 
+        }
+
+        h1, h2, h3, .brand-logo { font-family: 'Playfair Display', serif; }
+        .text-gold { color: var(--p-gold); }
+        .ls-2 { letter-spacing: 2px; }
+
+        /* Login Screen Styles */
+        #loginOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+            display: flex; align-items: center; justify-content: center; z-index: 10000;
+        }
+
+        .auth-card {
+            background: var(--p-gray); border: 1px solid var(--p-border);
+            border-radius: 30px; padding: 3rem 2rem; width: 100%; max-width: 420px;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.9); text-align: center;
+        }
+
+        .form-control-luxury {
+            background: #000 !important; border: 1px solid #333 !important;
+            color: white !important; border-radius: 15px; padding: 15px;
+            text-align: center; font-size: 1rem; margin-bottom: 1rem;
+        }
+
+        .btn-luxury {
+            background: var(--p-gold); color: black; font-weight: 800; padding: 15px;
+            border-radius: 15px; width: 100%; border: none; transition: 0.3s;
+            text-transform: uppercase; letter-spacing: 1px; cursor: pointer;
+        }
+        .btn-luxury:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(212, 175, 55, 0.4); }
+
+        /* Store Section Styles */
+        #mainApp { display: none; }
+
+        .navbar { 
+            background: rgba(10, 10, 10, 0.95); 
+            backdrop-filter: blur(15px); 
+            border-bottom: 1px solid var(--p-border); 
+            padding: 1.2rem 0;
+        }
+
+        .filter-pill {
+            background: transparent; border: 1px solid #333; color: rgba(255,255,255,0.6);
+            padding: 8px 22px; border-radius: 50px; white-space: nowrap;
+            transition: 0.3s; font-size: 0.85rem; font-weight: 500; cursor: pointer;
+        }
+        .filter-pill.active { background: var(--p-gold); color: black; border-color: var(--p-gold); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+
+        .product-card {
+            background: #111; border: 1px solid #222; border-radius: 20px;
+            overflow: hidden; transition: 0.4s; height: 100%; display: flex; flex-direction: column;
+            position: relative;
+        }
+        .product-card:hover { transform: translateY(-10px); border-color: var(--p-gold); box-shadow: 0 10px 30px rgba(212, 175, 55, 0.1); }
+
+        .product-img-wrapper { height: 260px; overflow: hidden; background: #050505; position: relative; }
+        .product-img { width: 100%; height: 100%; object-fit: cover; transition: 0.6s ease; }
+        .product-card:hover .product-img { transform: scale(1.1); }
+
+        .btn-add {
+            background: var(--p-gold); border: none; color: black;
+            font-weight: 800; padding: 7px 18px; border-radius: 50px; font-size: 0.7rem; cursor: pointer;
+        }
+
+        .admin-tag { background: #ff4d4d; color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; font-weight: 900; margin-left: 5px; }
+        
+        .btn-delete-card {
+            position: absolute; top: 10px; right: 10px; background: rgba(220, 53, 69, 0.9);
+            color: white; border: none; padding: 5px 10px; border-radius: 8px; font-size: 0.8rem;
+            z-index: 5; cursor: pointer; transition: 0.3s;
+        }
+
+        /* Notification Toast Styling */
+        #toast-container { position: fixed; bottom: 30px; right: 30px; z-index: 10001; }
+        .luxury-toast {
+            background: #222; border-left: 4px solid var(--p-gold); color: white;
+            padding: 12px 20px; border-radius: 10px; margin-bottom: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px; font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="toast-container"></div>
+
+    <!-- 1. LOGIN SECTION -->
+    <div id="loginOverlay">
+        <div class="auth-card animate__animated animate__fadeInDown">
+            <h1 class="brand-logo mb-1 text-white">ELITE<span class="text-gold">STORE</span></h1>
+            <p class="text-secondary mb-4 small text-uppercase ls-2">Luxury Store Entrance</p>
+            
+            <form id="loginForm">
+                <input type="text" id="userInput" class="form-control-luxury" placeholder="Username / Admin ID" required autocomplete="off">
+                <input type="password" id="passInput" class="form-control-luxury" placeholder="Password (Code)" required>
+                <button type="submit" class="btn-luxury" id="loginBtn">Log In</button>
+            </form>
+            
+            <!-- Highlighted Login Details -->
+            <div class="mt-4 p-3 border border-secondary rounded-4 small text-start">
+                <div class="mb-1 text-gold fw-bold">Login Details:</div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-secondary fw-semibold">Admin ID:</span> 
+                    <span class="text-white fw-bold">sheram123</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-secondary fw-semibold">Admin Pass:</span> 
+                    <span class="text-white fw-bold">123</span>
+                </div>
+                <hr class="my-2 border-secondary opacity-50">
+                <div class="d-flex justify-content-between">
+                    <span class="text-secondary fw-semibold">Customer Pass:</span> 
+                    <span class="text-white fw-bold">786</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. MAIN STORE UI -->
+    <div id="mainApp">
+        <nav class="navbar sticky-top navbar-expand-lg">
+            <div class="container">
+                <a href="#" class="brand-logo text-white text-decoration-none">ELITE<span class="text-gold">STORE</span></a>
+                
+                <div class="d-flex align-items-center gap-3 ms-auto order-lg-last">
+                    <span id="userDisplay" class="text-secondary small d-none d-md-block"></span>
+                    <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="window.logout()">Log Out</button>
+                    <div id="cartIconWrapper" class="position-relative ms-2" style="cursor:pointer" data-bs-toggle="offcanvas" data-bs-target="#cartBox">
+                        <i class="bi bi-bag-heart text-white fs-3"></i>
+                        <span id="cartCount" class="badge rounded-pill bg-warning text-dark position-absolute top-0 start-100 translate-middle" style="font-size:0.6rem">0</span>
+                    </div>
+                </div>
+
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+                    <i class="bi bi-list text-white fs-1"></i>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navMenu">
+                    <ul class="navbar-nav mx-auto">
+                        <li class="nav-item"><a class="nav-link text-white" href="#" onclick="window.showSection('store')">Catalog</a></li>
+                        <li id="adminNav" class="nav-item" style="display:none;"><a class="nav-link text-gold fw-bold" href="#" onclick="window.showSection('admin')">ADMIN PANEL</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <main class="container py-5">
+            <section id="storeSection">
+                <header class="text-center mb-5 animate__animated animate__fadeIn">
+                    <h6 class="text-gold text-uppercase ls-2">Established 2026</h6>
+                    <h1 class="display-3 fw-bold mt-2">The Luxury <span class="text-gold">Edit</span></h1>
+                    <p class="text-secondary mx-auto" style="max-width: 600px;">Ab hamare paas 50 se zyada premium pieces hain. Aapke shouk ke liye sabse behtareen selection.</p>
+                </header>
+
+                <div class="d-flex justify-content-center overflow-auto pb-4 gap-2 mb-5 no-scrollbar">
+                    <button class="filter-pill active" onclick="window.filterItems('All')">All Items</button>
+                    <button class="filter-pill" onclick="window.filterItems('Watch')">Watches</button>
+                    <button class="filter-pill" onclick="window.filterItems('Perfume')">Perfumes</button>
+                    <button class="filter-pill" onclick="window.filterItems('Shoes')">Shoes</button>
+                    <button class="filter-pill" onclick="window.filterItems('Bags')">Bags</button>
+                    <button class="filter-pill" onclick="window.filterItems('Jewelry')">Jewelry</button>
+                </div>
+
+                <div class="row g-4" id="productGrid"></div>
+            </section>
+
+            <!-- Admin Section -->
+            <section id="adminSection" style="display:none;">
+                <div class="row g-5">
+                    <div class="col-lg-4">
+                        <div class="auth-card w-100 p-4 text-start border-warning shadow-lg">
+                            <h4 class="mb-4 brand-logo text-gold">Add New Products</h4>
+                            <form id="addForm">
+                                <label class="small text-secondary mb-1">Items Name</label>
+                                <input type="text" id="aName" class="form-control-luxury text-start mb-3" required>
+                                
+                                <label class="small text-secondary mb-1">Select Categories</label>
+                                <select id="aCat" class="form-control-luxury text-start mb-3" required>
+                                    <option value="Watch">Watch</option>
+                                    <option value="Perfume">Perfume</option>
+                                    <option value="Shoes">Shoes</option>
+                                    <option value="Bags">Bags</option>
+                                    <option value="Jewelry">Jewelry</option>
+                                </select>
+                                
+                                <label class="small text-secondary mb-1">Price ($)</label>
+                                <input type="number" id="aPrice" class="form-control-luxury text-start mb-3" required>
+                                
+                                <label class="small text-secondary mb-1">Image URL</label>
+                                <input type="text" id="aImg" class="form-control-luxury text-start mb-3">
+                                
+                                <button type="submit" class="btn-luxury">Save Into Inventory</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-lg-8">
+                        <div class="auth-card w-100 p-4 text-start">
+                            <h4 class="brand-logo text-gold mb-4">Stock Ledger</h4>
+                            <div class="table-responsive">
+                                <table class="table table-dark table-hover border-secondary">
+                                    <thead>
+                                        <tr class="text-secondary small uppercase">
+                                            <th>Product</th>
+                                            <th>Category</th>
+                                            <th>Valuation</th>
+                                            <th class="text-end">Command</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="adminTable"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Bag Sidebar -->
+    <div class="offcanvas offcanvas-end bg-dark text-white" id="cartBox" style="width: 400px;">
+        <div class="offcanvas-header border-bottom border-secondary p-4">
+            <h5 class="offcanvas-title fw-bold">Shopping Bag</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body p-4">
+            <div id="cartList"></div>
+            <div id="emptyMsg" class="text-center py-5 opacity-25">
+                <i class="bi bi-cart-x display-1"></i>
+                <p class="mt-3">Aapka bag khali hai.</p>
+            </div>
+        </div>
+        <div class="offcanvas-footer p-4 border-top border-secondary">
+            <div class="d-flex justify-content-between mb-4 h5">
+                <span>Subtotal:</span><span class="text-gold" id="totalPrice">$0.00</span>
+            </div>
+            <button class="btn-luxury" onclick="window.checkout()">Complete Transaction</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "", authDomain: "", projectId: "", storageBucket: "", messagingSenderId: "", appId: "" };
+        
+        let auth, db;
+        try {
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+        } catch(e) { console.warn("Firebase initialization check."); }
+
+        const ADMIN_ID = "sheram123";
+        const ADMIN_PASS = "123";
+        const CUSTOMER_PASS = "786";
+
+        // 50+ LUXURY ITEMS
+        const defaultItems = [
+            { id: 'w1', name: 'Rolex Submariner Gold', cat: 'Watch', price: 38500, img: 'https://images.unsplash.com/photo-1547996160-81dfa63595dd?w=500' },
+            { id: 'w2', name: 'Patek Philippe Nautilus', cat: 'Watch', price: 98000, img: 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=500' },
+            { id: 'w3', name: 'Audemars Piguet Royal Oak', cat: 'Watch', price: 54000, img: 'https://images.unsplash.com/photo-1539874754764-5a96559165b0?w=500' },
+            { id: 'w4', name: 'Cartier Santos Skeleton', cat: 'Watch', price: 28500, img: 'https://images.unsplash.com/photo-1614164185128-e4ec99c436d7?w=500' },
+            { id: 'w5', name: 'Hublot Big Bang Unico', cat: 'Watch', price: 24000, img: 'https://images.unsplash.com/photo-1526045431048-f857369aba09?w=500' },
+            { id: 'w6', name: 'Omega Speedmaster Moon', cat: 'Watch', price: 7400, img: 'https://images.unsplash.com/photo-1619134766035-61da3522736e?w=500' },
+            { id: 'w7', name: 'IWC Big Pilot Perpetual', cat: 'Watch', price: 32000, img: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500' },
+            { id: 'w8', name: 'Breitling Navitimer B01', cat: 'Watch', price: 9200, img: 'https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=500' },
+            { id: 'w9', name: 'Zenith El Primero', cat: 'Watch', price: 8900, img: 'https://images.unsplash.com/photo-1508685096489-7aac29bb8b2a?w=500' },
+            { id: 'w10', name: 'Vacheron Constantin Overseas', cat: 'Watch', price: 45000, img: 'https://images.unsplash.com/photo-1612817159949-195b6eb9e31a?w=500' },
+            { id: 'w11', name: 'Jaeger-LeCoultre Reverso', cat: 'Watch', price: 12500, img: 'https://images.unsplash.com/photo-1622434641406-a158123450f9?w=500' },
+            { id: 'w12', name: 'Panerai Luminor Marina', cat: 'Watch', price: 7800, img: 'https://images.unsplash.com/photo-1548171916-0442f4c40212?w=500' },
+            { id: 'p1', name: 'Dior Sauvage Elixir', cat: 'Perfume', price: 195, img: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=500' },
+            { id: 'p2', name: 'Chanel No. 5 Parfum', cat: 'Perfume', price: 170, img: 'https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=500' },
+            { id: 'p3', name: 'Tom Ford Ombré Leather', cat: 'Perfume', price: 220, img: 'https://images.unsplash.com/photo-1615485240384-552e4ec317d0?w=500' },
+            { id: 'p4', name: 'Creed Aventus', cat: 'Perfume', price: 445, img: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?w=500' },
+            { id: 'p5', name: 'Baccarat Rouge 540', cat: 'Perfume', price: 340, img: 'https://images.unsplash.com/photo-1615485501062-b9187342674e?w=500' },
+            { id: 'p6', name: 'Versace Eros Flame', cat: 'Perfume', price: 125, img: 'https://images.unsplash.com/photo-1557170334-a9632e77c6e4?w=500' },
+            { id: 'p7', name: 'YSL Libre Intense', cat: 'Perfume', price: 160, img: 'https://images.unsplash.com/photo-1615485240905-188806209b0b?w=500' },
+            { id: 'p8', name: 'Armani Code Profumo', cat: 'Perfume', price: 140, img: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?w=500' },
+            { id: 'p9', name: 'Hermes Terre d\'Hermes', cat: 'Perfume', price: 135, img: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?w=500' },
+            { id: 'p10', name: 'Gucci Guilty Pour Homme', cat: 'Perfume', price: 110, img: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?w=500' },
+            { id: 's1', name: 'Jordan 1 Chicago Retro', cat: 'Shoes', price: 1450, img: 'https://images.unsplash.com/photo-1552346154-21d32810aba3?w=500' },
+            { id: 's2', name: 'Yeezy Boost 350 V2', cat: 'Shoes', price: 420, img: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=500' },
+            { id: 's3', name: 'Balenciaga Triple S', cat: 'Shoes', price: 1050, img: 'https://images.unsplash.com/photo-1582587319032-520427958133?w=500' },
+            { id: 's4', name: 'Hermès Paris Loafers', cat: 'Shoes', price: 1200, img: 'https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=500' },
+            { id: 's5', name: 'LV Trainer Sneaker', cat: 'Shoes', price: 1550, img: 'https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=500' },
+            { id: 's6', name: 'Prada Cloudbust Thunder', cat: 'Shoes', price: 920, img: 'https://images.unsplash.com/photo-1603808033192-082d6919d3e1?w=500' },
+            { id: 's7', name: 'Nike Off-White Presto', cat: 'Shoes', price: 1100, img: 'https://images.unsplash.com/photo-1552346154-21d32810aba3?w=500' },
+            { id: 's8', name: 'Gucci Ace Sneakers', cat: 'Shoes', price: 790, img: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=500' },
+            { id: 's9', name: 'Adidas Human Race NMD', cat: 'Shoes', price: 850, img: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=500' },
+            { id: 's10', name: 'Louboutin Pik Boat', cat: 'Shoes', price: 950, img: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=500' },
+            { id: 'b1', name: 'Gucci Horsebit 1955', cat: 'Bags', price: 3100, img: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500' },
+            { id: 'b2', name: 'LV Keepall Bandoulière', cat: 'Bags', price: 2800, img: 'https://images.unsplash.com/photo-1547949003-9792a18a2601?w=500' },
+            { id: 'b3', name: 'Hermès Birkin 30 Gold', cat: 'Bags', price: 26500, img: 'https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=500' },
+            { id: 'b4', name: 'Chanel Classic Flap', cat: 'Bags', price: 9200, img: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500' },
+            { id: 'b5', name: 'Prada Re-Edition 2005', cat: 'Bags', price: 1950, img: 'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=500' },
+            { id: 'b6', name: 'Fendi Peekaboo ISeeU', cat: 'Bags', price: 4600, img: 'https://images.unsplash.com/photo-1566150905458-1bf1fd113f0d?w=500' },
+            { id: 'b7', name: 'Dior Lady Dior Bag', cat: 'Bags', price: 5500, img: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500' },
+            { id: 'b8', name: 'YSL Sac De Jour', cat: 'Bags', price: 3200, img: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500' },
+            { id: 'b9', name: 'Celine Belt Bag', cat: 'Bags', price: 2400, img: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500' },
+            { id: 'b10', name: 'Bottega Veneta Cassette', cat: 'Bags', price: 3800, img: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500' },
+            { id: 'j1', name: 'Cartier Love Bracelet', cat: 'Jewelry', price: 7800, img: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500' },
+            { id: 'j2', name: 'Tiffany Solitaire Ring', cat: 'Jewelry', price: 16500, img: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500' },
+            { id: 'j3', name: 'Bvlgari Serpenti Necklace', cat: 'Jewelry', price: 35000, img: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500' },
+            { id: 'j4', name: 'Van Cleef Alhambra', cat: 'Jewelry', price: 6950, img: 'https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=500' },
+            { id: 'j5', name: 'Harry Winston Earrings', cat: 'Jewelry', price: 48000, img: 'https://images.unsplash.com/photo-1535632787350-4e68ef0ac584?w=500' },
+            { id: 'j6', name: 'Graff Diamond Brooch', cat: 'Jewelry', price: 22500, img: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500' },
+            { id: 'j7', name: 'Chopard Happy Hearts', cat: 'Jewelry', price: 3500, img: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500' },
+            { id: 'j8', name: 'Mikimoto Pearl String', cat: 'Jewelry', price: 9800, img: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500' },
+            { id: 'j9', name: 'Piaget Possession Ring', cat: 'Jewelry', price: 4200, img: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500' },
+            { id: 'j10', name: 'Boucheron Quatre Cuff', cat: 'Jewelry', price: 12000, img: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500' }
+        ];
+
+        let products = [...defaultItems];
+        let cart = [];
+        let userRole = 'customer';
+
+        window.notify = (msg) => {
+            const container = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = 'luxury-toast animate__animated animate__fadeInRight';
+            t.innerHTML = `<i class="bi bi-shield-check text-gold fs-5"></i><span>${msg}</span>`;
+            container.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        };
+
+        window.showSection = (name) => {
+            document.getElementById('storeSection').style.display = name === 'store' ? 'block' : 'none';
+            document.getElementById('adminSection').style.display = name === 'admin' ? 'block' : 'none';
+        };
+
+        window.logout = () => {
+            if(auth) signOut(auth);
+            localStorage.clear();
+            window.location.reload();
+        };
+
+        window.buy = (id) => {
+            if (userRole === 'admin') return;
+            const item = products.find(p => p.id === id);
+            cart.push(item);
+            updateCart();
+            window.notify(`${item.name} Added`);
+        };
+
+        window.drop = (idx) => { cart.splice(idx, 1); updateCart(); };
+
+        window.checkout = () => { 
+            if(!cart.length) return; 
+            cart = []; 
+            updateCart(); 
+            window.notify("Order Confirmed"); 
+        };
+
+        window.remove = async (id) => {
+            if(confirm("Expunge record from inventory?")) {
+                if(db) {
+                    try { await deleteDoc(doc(db, 'products', id)); window.notify("Deleted."); } catch (err) { alert("Error."); }
+                } else {
+                    products = products.filter(p => p.id !== id);
+                    renderStore(products);
+                    window.notify("Removed (Local Mode)");
+                }
+            }
+        };
+
+        window.filterItems = (cat) => {
+            document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+            if (event) event.target.classList.add('active');
+            if (cat === 'All') renderStore(products);
+            else renderStore(products.filter(p => p.cat === cat));
+        };
+
+        function enterStore(name, role) {
+            userRole = role;
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            document.getElementById('userDisplay').innerHTML = `Welcome, <span class="text-white fw-bold">${name}</span> ${role === 'admin' ? '<span class="admin-tag">ADMIN</span>' : ''}`;
+            document.getElementById('adminNav').style.display = role === 'admin' ? 'block' : 'none';
+            document.getElementById('cartIconWrapper').style.display = role === 'admin' ? 'none' : 'block';
+            
+            renderStore(products);
+            if(db) loadData();
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const u = document.getElementById('userInput').value.trim();
+            const p = document.getElementById('passInput').value.trim();
+
+            if (u === ADMIN_ID && p === ADMIN_PASS) {
+                if(auth) await signInAnonymously(auth);
+                localStorage.setItem('elite_user', u);
+                localStorage.setItem('elite_role', 'admin');
+                enterStore(u, 'admin');
+            } else if (p === CUSTOMER_PASS) {
+                if(auth) await signInAnonymously(auth);
+                localStorage.setItem('elite_user', u);
+                localStorage.setItem('elite_role', 'customer');
+                enterStore(u, 'customer');
+            } else {
+                alert("Credentials Invalid. Customer pass is 786.");
+            }
+        });
+
+        const savedUser = localStorage.getItem('elite_user');
+        const savedRole = localStorage.getItem('elite_role');
+        if (savedUser) enterStore(savedUser, savedRole);
+
+        function loadData() {
+            onSnapshot(collection(db, 'products'), (snap) => {
+                const fbData = snap.docs.map(d => ({ id: d.id, ...d.data(), isRemote: true }));
+                products = [...defaultItems, ...fbData];
+                renderStore(products);
+                renderAdmin(fbData);
+            });
+        }
+
+        function renderStore(data) {
+            const grid = document.getElementById('productGrid');
+            if (!grid) return;
+            grid.innerHTML = data.map(p => `
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="product-card animate__animated animate__fadeIn">
+                        <div class="product-img-wrapper">
+                            <img src="${p.img}" class="product-img" loading="lazy" onerror="this.src='https://placehold.co/400x500/111/D4AF37?text=${p.name}'">
+                            ${userRole === 'admin' ? `<button class="btn-delete-card" onclick="window.remove('${p.id}')"><i class="bi bi-trash"></i></button>` : ''}
+                        </div>
+                        <div class="p-3">
+                            <span class="text-gold small fw-bold text-uppercase ls-2" style="font-size:0.6rem">${p.cat}</span>
+                            <h6 class="mt-1 mb-3 fw-bold text-truncate" style="font-size:0.85rem">${p.name}</h6>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-white small">$${p.price.toLocaleString()}</span>
+                                ${userRole === 'customer' ? `<button class="btn-add" onclick="window.buy('${p.id}')">ADD</button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderAdmin(fbData) {
+            const tbody = document.getElementById('adminTable');
+            if(!tbody) return;
+            tbody.innerHTML = fbData.map(p => `
+                <tr class="align-middle">
+                    <td><div class="fw-bold">${p.name}</div></td>
+                    <td><span class="badge bg-dark border border-secondary">${p.cat}</span></td>
+                    <td class="text-gold fw-bold">$${p.price.toLocaleString()}</td>
+                    <td class="text-end"><button class="btn btn-sm btn-danger" onclick="window.remove('${p.id}')">Delete</button></td>
+                </tr>
+            `).join('');
+        }
+
+        document.getElementById('addForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newItem = {
+                name: document.getElementById('aName').value,
+                cat: document.getElementById('aCat').value,
+                price: Number(document.getElementById('aPrice').value),
+                img: document.getElementById('aImg').value || 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=500',
+                created: Date.now()
+            };
+            if(db) { await addDoc(collection(db, 'products'), newItem); }
+            else { products.push({...newItem, id: Date.now()}); renderStore(products); }
+            e.target.reset();
+            window.notify("Vault updated.");
+        });
+
+        function updateCart() {
+            document.getElementById('cartCount').innerText = cart.length;
+            document.getElementById('emptyMsg').style.display = cart.length ? 'none' : 'block';
+            const list = document.getElementById('cartList');
+            let total = 0;
+            list.innerHTML = cart.map((item, idx) => {
+                total += item.price;
+                return `
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary">
+                        <div class="pe-2 overflow-hidden"><div class="small fw-bold text-truncate">${item.name}</div><div class="text-gold small">$${item.price.toLocaleString()}</div></div>
+                        <button class="btn btn-sm text-danger" onclick="window.drop(${idx})"><i class="bi bi-x-circle"></i></button>
+                    </div>`;
+            }).join('');
+            document.getElementById('totalPrice').innerText = `$${total.toLocaleString()}`;
+        }
+    </script>
+</body>
+</html>
